@@ -1,0 +1,96 @@
+# Destination clusters. bbox = [south, west, north, east] in degrees (WGS84).
+# Boxes are approximate and meant to be tuned. Nesting is allowed: a provider
+# is assigned to the smallest box that contains it, so Havelock beats Andaman.
+#
+#   mode: travel (tourist destination) | local (city, "Local mode")
+
+destinations:
+  # Andaman & Nicobar: the launch wedge
+  - {id: andaman, name: Andaman Islands, state: IN-AN, kind: island, mode: travel, bbox: [10.50, 92.20, 13.70, 93.10]}
+  - {id: havelock, name: Havelock (Swaraj Dweep), state: IN-AN, kind: island, mode: travel, bbox: [11.93, 92.93, 12.08, 93.07]}
+  - {id: neil, name: Neil (Shaheed Dweep), state: IN-AN, kind: island, mode: travel, bbox: [11.80, 93.00, 11.86, 93.06]}
+  - {id: port_blair, name: Port Blair (Sri Vijaya Puram), state: IN-AN, kind: city, mode: travel, bbox: [11.55, 92.65, 11.73, 92.77]}
+
+  # Himalaya
+  - {id: leh, name: Leh, state: IN-LA, kind: hill, mode: travel, bbox: [34.05, 77.45, 34.25, 77.70]}
+  - {id: ladakh, name: Ladakh, state: IN-LA, kind: hill, mode: travel, bbox: [32.30, 75.30, 35.70, 80.30]}
+  - {id: spiti, name: Spiti (Kaza), state: IN-HP, kind: hill, mode: travel, bbox: [32.10, 77.90, 32.40, 78.30]}
+  - {id: manali, name: Manali, state: IN-HP, kind: hill, mode: travel, bbox: [32.18, 77.13, 32.33, 77.22]}
+  - {id: bir_billing, name: Bir Billing, state: IN-HP, kind: hill, mode: travel, bbox: [32.02, 76.68, 32.08, 76.76]}
+  - {id: dharamshala, name: Dharamshala & McLeod Ganj, state: IN-HP, kind: hill, mode: travel, bbox: [32.18, 76.28, 32.27, 76.36]}
+  - {id: rishikesh, name: Rishikesh, state: IN-UK, kind: hill, mode: travel, bbox: [30.05, 78.24, 30.17, 78.36]}
+  - {id: darjeeling, name: Darjeeling, state: IN-WB, kind: hill, mode: travel, bbox: [26.98, 88.22, 27.08, 88.30]}
+  - {id: gangtok, name: Gangtok, state: IN-SK, kind: hill, mode: travel, bbox: [27.30, 88.58, 27.37, 88.64]}
+  - {id: shillong, name: Shillong, state: IN-ML, kind: hill, mode: travel, bbox: [25.53, 91.84, 25.62, 91.93]}
+
+  # Coast
+  - {id: goa_north, name: North Goa, state: IN-GA, kind: beach, mode: travel, bbox: [15.48, 73.67, 15.80, 74.00]}
+  - {id: goa_south, name: South Goa, state: IN-GA, kind: beach, mode: travel, bbox: [14.89, 73.85, 15.40, 74.20]}
+  - {id: gokarna, name: Gokarna, state: IN-KA, kind: beach, mode: travel, bbox: [14.50, 74.30, 14.58, 74.35]}
+  - {id: varkala, name: Varkala, state: IN-KL, kind: beach, mode: travel, bbox: [8.70, 76.68, 8.77, 76.74]}
+  - {id: alleppey, name: Alleppey (Alappuzha), state: IN-KL, kind: backwater, mode: travel, bbox: [9.40, 76.28, 9.60, 76.45]}
+  - {id: kochi, name: Kochi, state: IN-KL, kind: city, mode: travel, bbox: [9.90, 76.20, 10.05, 76.35]}
+  - {id: pondicherry, name: Puducherry, state: IN-PY, kind: beach, mode: travel, bbox: [11.88, 79.78, 11.98, 79.86]}
+  - {id: lakshadweep, name: Lakshadweep, state: IN-LD, kind: island, mode: travel, bbox: [8.20, 71.70, 12.40, 74.00]}
+
+  # Hills & plantations, south
+  - {id: coorg, name: Coorg (Kodagu), state: IN-KA, kind: hill, mode: travel, bbox: [12.00, 75.40, 12.75, 76.20]}
+  - {id: munnar, name: Munnar, state: IN-KL, kind: hill, mode: travel, bbox: [10.00, 77.00, 10.15, 77.12]}
+  - {id: hampi, name: Hampi, state: IN-KA, kind: heritage, mode: travel, bbox: [15.30, 76.43, 15.36, 76.50]}
+  - {id: lonavala, name: Lonavala, state: IN-MH, kind: hill, mode: travel, bbox: [18.72, 73.38, 18.78, 73.43]}
+
+  # Rajasthan & heritage
+  - {id: jaipur, name: Jaipur, state: IN-RJ, kind: heritage, mode: travel, bbox: [26.80, 75.70, 27.02, 75.95]}
+  - {id: udaipur, name: Udaipur, state: IN-RJ, kind: heritage, mode: travel, bbox: [24.52, 73.62, 24.66, 73.78]}
+  - {id: jaisalmer, name: Jaisalmer, state: IN-RJ, kind: desert, mode: travel, bbox: [26.80, 70.80, 26.97, 70.98]}
+  - {id: varanasi, name: Varanasi, state: IN-UP, kind: pilgrimage, mode: travel, bbox: [25.25, 82.93, 25.40, 83.05]}
+
+  # Cities: Local mode
+  - {id: bengaluru, name: Bengaluru, state: IN-KA, kind: city, mode: local, bbox: [12.83, 77.46, 13.14, 77.78]}
+  - {id: hyderabad, name: Hyderabad, state: IN-TG, kind: city, mode: local, bbox: [17.25, 78.30, 17.58, 78.65]}
+  - {id: mumbai, name: Mumbai, state: IN-MH, kind: city, mode: local, bbox: [18.89, 72.77, 19.27, 73.00]}
+  - {id: delhi_ncr, name: Delhi NCR, state: IN-DL, kind: city, mode: local, bbox: [28.40, 76.84, 28.88, 77.35]}
+  - {id: pune, name: Pune, state: IN-MH, kind: city, mode: local, bbox: [18.42, 73.74, 18.64, 73.98]}
+  - {id: chennai, name: Chennai, state: IN-TN, kind: city, mode: local, bbox: [12.95, 80.18, 13.23, 80.31]}
+  - {id: kolkata, name: Kolkata, state: IN-WB, kind: city, mode: local, bbox: [22.45, 88.25, 22.65, 88.45]}
+  - {id: ahmedabad, name: Ahmedabad, state: IN-GJ, kind: city, mode: local, bbox: [22.95, 72.48, 23.12, 72.68]}
+
+# States and union territories, for state-wide OpenStreetMap pulls.
+# Several ISO 3166-2 codes changed in 2023; OSM may carry either, so both are listed.
+states:
+  - {code: IN-AN, name: Andaman and Nicobar Islands}
+  - {code: IN-AP, name: Andhra Pradesh}
+  - {code: IN-AR, name: Arunachal Pradesh}
+  - {code: IN-AS, name: Assam}
+  - {code: IN-BR, name: Bihar}
+  - {code: IN-CH, name: Chandigarh}
+  - {code: IN-CG, name: Chhattisgarh, alt: [IN-CT]}
+  - {code: IN-DH, name: Dadra and Nagar Haveli and Daman and Diu, alt: [IN-DN, IN-DD]}
+  - {code: IN-DL, name: Delhi}
+  - {code: IN-GA, name: Goa}
+  - {code: IN-GJ, name: Gujarat}
+  - {code: IN-HR, name: Haryana}
+  - {code: IN-HP, name: Himachal Pradesh}
+  - {code: IN-JK, name: Jammu and Kashmir}
+  - {code: IN-JH, name: Jharkhand}
+  - {code: IN-KA, name: Karnataka}
+  - {code: IN-KL, name: Kerala}
+  - {code: IN-LA, name: Ladakh}
+  - {code: IN-LD, name: Lakshadweep}
+  - {code: IN-MP, name: Madhya Pradesh}
+  - {code: IN-MH, name: Maharashtra}
+  - {code: IN-MN, name: Manipur}
+  - {code: IN-ML, name: Meghalaya}
+  - {code: IN-MZ, name: Mizoram}
+  - {code: IN-NL, name: Nagaland}
+  - {code: IN-OD, name: Odisha, alt: [IN-OR]}
+  - {code: IN-PY, name: Puducherry}
+  - {code: IN-PB, name: Punjab}
+  - {code: IN-RJ, name: Rajasthan}
+  - {code: IN-SK, name: Sikkim}
+  - {code: IN-TN, name: Tamil Nadu}
+  - {code: IN-TG, name: Telangana, alt: [IN-TS]}
+  - {code: IN-TR, name: Tripura}
+  - {code: IN-UP, name: Uttar Pradesh}
+  - {code: IN-UK, name: Uttarakhand, alt: [IN-UT]}
+  - {code: IN-WB, name: West Bengal}

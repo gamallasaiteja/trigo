@@ -1,0 +1,13 @@
+# Template for a state or central tourism registry (approved operators,
+# adventure-tourism registrations, water-sports permits). Copy per registry,
+# rename the columns to match the published sheet, and set the state.
+source_id: tourism_registry
+columns:
+  external_id: Registration No
+  name: Name of Operator
+  phone: Contact No
+  email: Email
+  address: Address
+  categories: Activity
+defaults:
+  state: IN-AN

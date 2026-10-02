@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {"type": "node", "id": 101, "lat": 12.0331, "lon": 92.9857,
+     "tags": {"shop": "scuba_diving", "name": "Coral Garden Divers", "phone": "+91 94342 11111",
+              "website": "https://www.coralgardendivers.example", "addr:city": "Swaraj Dweep"}},
+    {"type": "way", "id": 202, "center": {"lat": 12.0102, "lon": 92.9701},
+     "tags": {"tourism": "camp_site", "name": "Beach Nest Camp"}},
+    {"type": "node", "id": 303, "lat": 12.0405, "lon": 92.9911,
+     "tags": {"amenity": "boat_rental", "sport": "snorkelling;canoe", "name": "Lagoon Kayak & Snorkel",
+              "contact:instagram": "https://instagram.com/lagoonkayak/"}},
+    {"type": "node", "id": 404, "lat": 12.0350, "lon": 92.9870,
+     "tags": {"shop": "supermarket", "name": "Island Super Market"}},
+    {"type": "node", "id": 505, "lat": 12.0360, "lon": 92.9880,
+     "tags": {"shop": "scuba_diving"}}
+  ]
+}

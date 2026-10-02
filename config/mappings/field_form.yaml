@@ -1,0 +1,15 @@
+# Yuvoy field-team capture (Google Form -> Sheets -> CSV export).
+# Suggested form questions match the column names on the right.
+source_id: field
+columns:
+  external_id: Response ID
+  name: Business name
+  phone: WhatsApp / phone
+  email: Email
+  website: Website
+  instagram: Instagram
+  address: Address
+  lat: Latitude
+  lng: Longitude
+  state: State code
+  categories: Categories        # ';'-separated taxonomy ids, e.g. scuba_diving;snorkelling

@@ -1,0 +1,145 @@
+# Experience taxonomy. Every provider gets one or more leaf categories.
+#
+#   mode:     travel (episodic, high-ticket) | weekend (recurring, social) | everyday (habitual)
+#   kind:     operator (runs the experience) | venue (place you go) | agency (resells others)
+#   osm:      OpenStreetMap tag matchers, "key=value" or "key=*"
+#   keywords: whole-word matches against the business name (lowercase)
+#
+# Parents group leaves for reporting; only leaves are assigned.
+
+groups:
+  - id: water
+    name: Water
+    children:
+      - {id: scuba_diving, name: Scuba diving, mode: travel,
+         osm: [shop=scuba_diving, sport=scuba_diving, amenity=dive_centre],
+         keywords: [scuba, diving, divers, dive centre, dive center, dive shop, padi]}
+      - {id: snorkelling, name: Snorkelling, mode: travel,
+         osm: [sport=snorkelling],
+         keywords: [snorkel, snorkeling, snorkelling]}
+      - {id: boat_tours, name: Boat tours & cruises, mode: travel,
+         osm: [amenity=boat_rental, tourism=boat_tour],
+         keywords: [boat tour, boat trip, cruise, cruises, houseboat, houseboats, glass bottom, shikara, yacht, yachts]}
+      - {id: water_sports, name: Water sports, mode: travel,
+         osm: [sport=water_ski, sport=surfing, sport=kitesurfing, sport=windsurfing, sport=canoe,
+               sport=sailing, shop=water_sports, leisure=water_sports],
+         keywords: [water sports, watersports, surf, surfing, kayak, kayaking, parasailing, jet ski, sup, paddle, sailing]}
+      - {id: rafting, name: River rafting, mode: travel,
+         osm: [sport=rafting, whitewater=*],
+         keywords: [rafting, white water]}
+      - {id: fishing, name: Fishing, mode: travel,
+         osm: [leisure=fishing, sport=fishing],
+         keywords: [angling, fishing]}
+
+  - id: adventure
+    name: Adventure
+    children:
+      - {id: trekking, name: Trekking & hiking, mode: travel,
+         keywords: [trek, treks, trekking, hiking, hikes, himalayan expeditions, mountaineering]}
+      - {id: paragliding, name: Paragliding & air sports, mode: travel,
+         osm: [sport=free_flying, sport=paragliding, sport=parachuting, sport=skydiving],
+         keywords: [paragliding, paramotor, skydiving, hot air balloon, ballooning]}
+      - {id: climbing, name: Climbing & rappelling, mode: weekend,
+         osm: [sport=climbing, leisure=climbing],
+         keywords: [climbing, bouldering, rappelling]}
+      - {id: camping, name: Camping & glamping, mode: travel,
+         osm: [tourism=camp_site],
+         keywords: [camp, camps, camping, glamping, campsite]}
+      - {id: wildlife_safari, name: Wildlife & safari, mode: travel,
+         keywords: [safari, safaris, jungle, wildlife, birding, birdwatching]}
+      - {id: snow_sports, name: Snow sports, mode: travel,
+         osm: [sport=skiing, landuse=winter_sports],
+         keywords: [ski, skiing, snowboard]}
+      - {id: biking_tours, name: Cycling & motorbike tours, mode: travel,
+         keywords: [cycling tours, bike tours, motorbike tours, bike expeditions, bike rentals, bike rental]}
+      - {id: aerial_adventure, name: Ziplines, bungee & adventure parks, mode: weekend,
+         osm: [leisure=adventure_park],
+         keywords: [zipline, zip line, bungee, bungy, adventure park, ropes course]}
+      - {id: horse_riding, name: Horse & camel riding, mode: travel,
+         osm: [leisure=horse_riding, sport=equestrian],
+         keywords: [horse riding, camel safari, equestrian]}
+
+  - id: culture
+    name: Culture & heritage
+    children:
+      - {id: guided_tours, name: Guided tours & walks, mode: travel, kind: operator,
+         osm: [office=guide, tourism=guide],
+         keywords: [heritage walk, walking tour, walks, guided tour, city tour, tour guide, storytelling]}
+      - {id: museums_heritage, name: Museums & heritage sites, mode: travel, kind: venue,
+         osm: [tourism=museum, tourism=gallery, historic=castle, historic=fort],
+         keywords: [museum, gallery]}
+      - {id: festivals_events, name: Festivals & cultural events, mode: weekend, kind: venue,
+         osm: [amenity=events_venue],
+         keywords: [festival, mela]}
+      - {id: village_rural, name: Village & rural experiences, mode: travel,
+         keywords: [village tour, village stay, homestay experience, rural tourism, tribal]}
+
+  - id: food
+    name: Food & drink
+    children:
+      - {id: cooking_classes, name: Cooking classes, mode: weekend,
+         osm: [amenity=cooking_school],
+         keywords: [cooking class, cooking classes, cookery, culinary]}
+      - {id: food_tours, name: Food tours, mode: travel,
+         keywords: [food tour, food walk, food trail]}
+      - {id: wine_brewery, name: Wineries, breweries & distilleries, mode: weekend, kind: venue,
+         osm: [craft=winery, craft=brewery, craft=distillery, tourism=wine_cellar],
+         keywords: [winery, vineyard, vineyards, brewery, brewing, distillery]}
+      - {id: plantation_tours, name: Tea, coffee & spice estates, mode: travel,
+         keywords: [tea estate, coffee estate, spice plantation, plantation tour, tea garden]}
+
+  - id: wellness
+    name: Wellness
+    children:
+      - {id: yoga, name: Yoga & meditation, mode: everyday,
+         osm: [sport=yoga, amenity=meditation_centre],
+         keywords: [yoga, meditation, ashram, vipassana]}
+      - {id: spa_ayurveda, name: Spa & ayurveda, mode: weekend, kind: venue,
+         osm: [leisure=spa, amenity=spa, shop=massage, healthcare:speciality=ayurveda],
+         keywords: [spa, ayurveda, ayurvedic, panchakarma, massage]}
+      - {id: retreats, name: Retreats, mode: travel,
+         keywords: [retreat, retreats, wellness retreat]}
+
+  - id: workshops
+    name: Workshops & classes
+    children:
+      - {id: art_craft, name: Art & craft workshops, mode: weekend,
+         osm: [craft=pottery, amenity=arts_centre, craft=handicraft],
+         keywords: [pottery, ceramics, art studio, workshop, workshops, painting class, block printing, weaving]}
+      - {id: dance, name: Dance classes, mode: everyday,
+         osm: [leisure=dance, amenity=dancing_school],
+         keywords: [dance, dance studio, dance academy]}
+      - {id: music, name: Music classes, mode: everyday,
+         osm: [amenity=music_school],
+         keywords: [music school, music academy, music classes]}
+      - {id: photography, name: Photography tours & classes, mode: weekend,
+         keywords: [photography tour, photo walk, photowalk]}
+
+  - id: sports
+    name: Sports & fitness
+    children:
+      - {id: sports_venues, name: Sports centres & clubs, mode: everyday, kind: venue,
+         osm: [leisure=sports_centre, leisure=golf_course, sport=karting, leisure=ice_rink],
+         keywords: [go karting, karting, golf, turf, sports club]}
+      - {id: running_clubs, name: Running & outdoor clubs, mode: everyday,
+         keywords: [run club, running club, runners, cyclists club]}
+
+  - id: entertainment
+    name: Entertainment & nightlife
+    children:
+      - {id: games_venues, name: Escape rooms, gaming & bowling, mode: weekend, kind: venue,
+         osm: [leisure=escape_game, leisure=bowling_alley, leisure=amusement_arcade],
+         keywords: [escape room, board game, board games, bowling, laser tag, paintball, trampoline]}
+      - {id: live_events, name: Live music, comedy & theatre, mode: weekend, kind: venue,
+         osm: [amenity=theatre, amenity=music_venue, amenity=nightclub],
+         keywords: [comedy club, open mic, live music, theatre]}
+      - {id: theme_parks, name: Theme & water parks, mode: weekend, kind: venue,
+         osm: [tourism=theme_park, leisure=water_park, tourism=zoo, tourism=aquarium],
+         keywords: [water park, theme park, amusement park, aquarium]}
+
+  - id: agencies
+    name: Travel agencies & tour operators
+    children:
+      - {id: tour_operators, name: Tour operators & travel agents, mode: travel, kind: agency,
+         osm: [shop=travel_agency, office=travel_agent, office=tour_operator],
+         keywords: [travels, tours and travels, tour operator, holidays, travel agency, tourism]}

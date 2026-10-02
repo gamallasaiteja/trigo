@@ -1,0 +1,15 @@
+# Dive centres collected from the PADI dive-shop locator (facts only:
+# name, contact, location). Same shape works for SSI.
+source_id: padi
+columns:
+  external_id: Store Number
+  name: Name
+  phone: Phone
+  email: Email
+  website: Website
+  address: Address
+  lat: Latitude
+  lng: Longitude
+  state: State code
+defaults:
+  categories: scuba_diving
