@@ -6,3 +6,6 @@ __pycache__/
 exports/
 *.csv
 !tests/fixtures/*.csv
+
+# Live operator sheets hold contact details: keep them in Google Sheets, not here
+*.xlsx
