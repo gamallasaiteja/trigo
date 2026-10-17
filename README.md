@@ -1,5 +1,8 @@
 # trigo: Yuvoy supply database
 
+> Also in this repo: [`daily/`](daily/README.md), a standalone daily planning and
+> check-in app (plan in the morning, check-ins through the day, evening review).
+
 An India-wide database of experience providers (dive shops, trek operators,
 cooking classes, pottery studios, everything in `config/taxonomy.yaml`), built
 from many sources and merged into one record per real business.

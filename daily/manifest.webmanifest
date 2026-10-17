@@ -1,0 +1,13 @@
+{
+  "name": "Daily Check-in",
+  "short_name": "Check-in",
+  "description": "Plan your day in the morning, check in during the day, review completion at night.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f6fb",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

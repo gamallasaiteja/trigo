@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Daily Check-in</title>
+  <meta name="description" content="Plan your day in the morning, check in during the day, review completion at night.">
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1 id="today-label">Today</h1>
+      <p id="phase-label" class="muted"></p>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <button data-tab="today" class="tab active">Today</button>
+      <button data-tab="history" class="tab">History</button>
+      <button data-tab="settings" class="tab">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Today: one of the four phase panels is shown -->
+    <section id="tab-today" class="tab-panel">
+
+      <div id="panel-plan" class="card" hidden>
+        <h2>Good morning. What do you want to do today?</h2>
+        <form id="plan-form" class="add-row">
+          <input id="plan-input" type="text" placeholder="Add something you want to get done" autocomplete="off" maxlength="200">
+          <button type="submit" class="btn">Add</button>
+        </form>
+        <div id="carry-box" hidden>
+          <p class="muted small">Unfinished from last time:</p>
+          <div id="carry-list" class="chips"></div>
+        </div>
+        <ul id="plan-list" class="task-list"></ul>
+        <button id="start-day" class="btn primary wide" disabled>Start my day</button>
+      </div>
+
+      <div id="panel-active" class="card" hidden>
+        <div class="progress-head">
+          <h2>Your day</h2>
+          <span id="active-pct" class="pct"></span>
+        </div>
+        <div class="bar"><div id="active-bar" class="bar-fill"></div></div>
+        <ul id="active-list" class="task-list"></ul>
+        <form id="active-form" class="add-row">
+          <input id="active-input" type="text" placeholder="Add another task" autocomplete="off" maxlength="200">
+          <button type="submit" class="btn">Add</button>
+        </form>
+        <p id="next-checkin" class="muted small"></p>
+        <div class="row">
+          <button id="checkin-now" class="btn">Check in now</button>
+          <button id="end-now" class="btn ghost">End my day</button>
+        </div>
+        <div id="checkin-log-box" hidden>
+          <h3>Check-ins</h3>
+          <ul id="checkin-log" class="log"></ul>
+        </div>
+      </div>
+
+      <div id="panel-review" class="card" hidden>
+        <h2>How did today go?</h2>
+        <p class="muted small">Mark each task. Unfinished ones carry to tomorrow unless you untick them.</p>
+        <ul id="review-list" class="review-list"></ul>
+        <label class="field">
+          <span>Anything to note about today?</span>
+          <textarea id="reflection" rows="3" placeholder="What went well, what got in the way…"></textarea>
+        </label>
+        <button id="close-day" class="btn primary wide">Close the day</button>
+      </div>
+
+      <div id="panel-closed" class="card" hidden>
+        <h2>Day complete</h2>
+        <div class="summary">
+          <div class="big" id="closed-pct"></div>
+          <div id="closed-detail" class="muted"></div>
+        </div>
+        <ul id="closed-list" class="task-list readonly"></ul>
+        <p id="closed-reflection" class="quote" hidden></p>
+        <p class="muted small">See you tomorrow. Your morning prompt comes at <span id="closed-start"></span>.</p>
+        <button id="reopen-day" class="btn ghost">Reopen today</button>
+      </div>
+    </section>
+
+    <section id="tab-history" class="tab-panel" hidden>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="stat-streak">0</div><div class="stat-lbl">day streak</div></div>
+        <div class="stat"><div class="stat-val" id="stat-avg">–</div><div class="stat-lbl">avg completion, 7 days</div></div>
+        <div class="stat"><div class="stat-val" id="stat-days">0</div><div class="stat-lbl">days tracked</div></div>
+      </div>
+      <div class="card">
+        <h2>Last 14 days</h2>
+        <div id="chart" class="chart" role="img" aria-label="Completion per day for the last 14 days"></div>
+      </div>
+      <div class="card">
+        <h2>Days</h2>
+        <ul id="history-list" class="history-list"></ul>
+        <p id="history-empty" class="muted">No days yet. Close your first day to see it here.</p>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="tab-panel" hidden>
+      <form id="settings-form" class="card">
+        <h2>Schedule</h2>
+        <label class="field"><span>Morning prompt at</span><input type="time" name="dayStart" required></label>
+        <label class="field"><span>End-of-day review at</span><input type="time" name="dayEnd" required></label>
+        <label class="field"><span>Check in every</span>
+          <select name="checkinMinutes">
+            <option value="60">1 hour</option>
+            <option value="90">1.5 hours</option>
+            <option value="120">2 hours</option>
+            <option value="180">3 hours</option>
+            <option value="240">4 hours</option>
+          </select>
+        </label>
+        <button type="submit" class="btn primary">Save</button>
+        <span id="settings-saved" class="muted small" hidden>Saved</span>
+      </form>
+      <div class="card">
+        <h2>Reminders</h2>
+        <p class="muted small" id="notif-status"></p>
+        <button id="notif-enable" class="btn">Turn on notifications</button>
+        <p class="muted small">Reminders fire while the app is open, including in a background tab
+          or as an installed app. Phones may pause it when it's fully closed; the prompts still show
+          as soon as you open it.</p>
+      </div>
+      <div class="card">
+        <h2>Your data</h2>
+        <p class="muted small">Everything stays on this device. Export to back it up or move it.</p>
+        <div class="row">
+          <button id="export" class="btn">Export</button>
+          <label class="btn">Import<input id="import" type="file" accept="application/json" hidden></label>
+          <button id="reset" class="btn danger">Erase everything</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="checkin-dialog">
+    <form method="dialog" id="checkin-form">
+      <h2 id="checkin-title">Check-in</h2>
+      <p class="muted">How's it going? Tick anything you've finished.</p>
+      <ul id="checkin-tasks" class="task-list"></ul>
+      <fieldset class="mood">
+        <legend>How are you doing?</legend>
+        <label><input type="radio" name="mood" value="on-track" checked> On track</label>
+        <label><input type="radio" name="mood" value="slow"> Slow</label>
+        <label><input type="radio" name="mood" value="stuck"> Stuck</label>
+      </fieldset>
+      <label class="field">
+        <span>Need anything, or something in the way?</span>
+        <textarea name="note" rows="2" placeholder="Optional"></textarea>
+      </label>
+      <div class="row end">
+        <button type="button" id="checkin-snooze" class="btn ghost">Snooze 30 min</button>
+        <button type="submit" value="save" class="btn primary">Save check-in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
