@@ -2,8 +2,13 @@ import {
   DEFAULT_SETTINGS, STATUS, dateKey, atTime, newDay, makeTask, setStatus, phase,
   nextCheckinAt, isCheckinDue, isPlanDue, completion, closeDay, carryOverFrom, streak,
 } from "./logic.js";
+import {
+  QUADRANTS, QUADRANT_ORDER, quadrantOf, splitRaw, classifyLocal, describeSorted, isChatter,
+} from "./classify.js";
+import { classifyWithClaude } from "./ai.js";
 
 const STORE_KEY = "daily-checkin-v1";
+const KEY_STORE = "daily-checkin-claude-key"; // kept apart so exports never include it
 const $ = (id) => document.getElementById(id);
 
 // ---------- storage ----------
@@ -24,6 +29,15 @@ function save() {
 }
 
 const state = load();
+
+function getApiKey() {
+  try { return localStorage.getItem(KEY_STORE) || ""; } catch { return ""; }
+}
+function setApiKey(key) {
+  try { key ? localStorage.setItem(KEY_STORE, key) : localStorage.removeItem(KEY_STORE); } catch { /* ignore */ }
+}
+
+const byQuadrant = (a, b) => QUADRANT_ORDER.indexOf(quadrantOf(a)) - QUADRANT_ORDER.indexOf(quadrantOf(b));
 
 function today() {
   const key = dateKey(new Date());
@@ -128,24 +142,117 @@ function render() {
   if (tab === "history") renderHistory();
 }
 
-function taskRow(day, t, { removable = false, checkable = true } = {}) {
-  const done = t.status === STATUS.DONE;
-  return el("li", { class: done ? "is-done" : "" },
-    checkable ? el("input", {
-      type: "checkbox", checked: done, "aria-label": `Done: ${t.title}`,
-      onchange: (e) => { setStatus(t, e.target.checked ? STATUS.DONE : STATUS.OPEN); save(); render(); },
-    }) : null,
-    el("span", { class: "title" }, t.title),
-    t.carriedFrom ? el("span", { class: "tag" }, "carried") : null,
-    removable ? el("button", {
-      class: "icon-btn", type: "button", "aria-label": `Remove ${t.title}`,
-      onclick: () => { day.tasks = day.tasks.filter((x) => x !== t); save(); render(); },
-    }, "×") : null,
-  );
+function renderMatrix(container, day, { checkable }) {
+  container.replaceChildren(...QUADRANT_ORDER.map((q) => {
+    const tasks = day.tasks.filter((t) => quadrantOf(t) === q);
+    return el("section", { class: `quad quad-${q}`, "aria-label": QUADRANTS[q].label },
+      el("h3", {}, QUADRANTS[q].label, el("span", { class: "count" }, tasks.length ? String(tasks.length) : "")),
+      el("p", { class: "qhint" }, QUADRANTS[q].hint),
+      tasks.length
+        ? el("ul", {}, ...tasks.map((t) => el("li", { class: t.status === STATUS.DONE ? "is-done" : "" },
+          checkable ? el("input", {
+            type: "checkbox", checked: t.status === STATUS.DONE, "aria-label": `Done: ${t.title}`,
+            onchange: (e) => { setStatus(t, e.target.checked ? STATUS.DONE : STATUS.OPEN); save(); render(); },
+          }) : null,
+          el("button", { class: "task-btn", type: "button", title: "Move or remove", onclick: () => openMove(t) }, t.title))))
+        : el("p", { class: "empty" }, "Nothing here"));
+  }));
 }
 
+function renderChat(container, messages) {
+  const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 40;
+  container.replaceChildren(...messages.map((m) => el("div", { class: `msg ${m.role}${m.pending ? " thinking" : ""}` },
+    m.text,
+    m.via ? el("span", { class: "via" }, m.via) : null)));
+  if (atBottom || messages.at(-1)?.role === "user" || messages.at(-1)?.pending) container.scrollTop = container.scrollHeight;
+}
+
+// ---------- chat: what you type becomes sorted tasks ----------
+
+let busy = false;
+
+async function handleChat(text) {
+  const day = today();
+  day.chat ??= [];
+  day.chat.push({ role: "user", text, at: new Date().toISOString() });
+  const key = getApiKey();
+
+  if (isChatter(text) && !key) {
+    day.chat.push({ role: "bot", text: describeSorted([]), at: new Date().toISOString() });
+    save();
+    render();
+    return;
+  }
+
+  const pending = { role: "bot", text: key ? "Sorting with Claude…" : "Sorting…", pending: true, at: new Date().toISOString() };
+  day.chat.push(pending);
+  render();
+
+  let sorted = null;
+  let lead = null;
+  let via = "Sorted on this device";
+  if (key) {
+    try {
+      const res = await classifyWithClaude(key, text, day.tasks.map((t) => t.title));
+      sorted = res.tasks;
+      lead = res.reply;
+      via = "Sorted by Claude";
+    } catch (err) {
+      via = `${err.message}, so I sorted it on this device`;
+    }
+  }
+  sorted ??= isChatter(text) ? [] : splitRaw(text).map(classifyLocal);
+
+  const have = new Set(day.tasks.map((t) => t.title.toLowerCase()));
+  const added = [];
+  const skipped = [];
+  for (const s of sorted) {
+    if (have.has(s.title.toLowerCase())) { skipped.push(s.title); continue; }
+    have.add(s.title.toLowerCase());
+    const task = makeTask(s.title);
+    task.quadrant = s.quadrant;
+    task.reason = s.reason;
+    day.tasks.push(task);
+    added.push(s);
+  }
+
+  day.chat = day.chat.filter((m) => m !== pending);
+  day.chat.push({ role: "bot", text: describeSorted(added, skipped, lead), via, at: new Date().toISOString() });
+  save();
+  render();
+}
+
+// ---------- move dialog ----------
+
+let moving = null;
+
+function openMove(task) {
+  moving = task;
+  $("move-title").textContent = task.title;
+  $("move-reason").textContent = task.reason ? `Sorted here because: ${task.reason}.` : "";
+  $("move-options").replaceChildren(...QUADRANT_ORDER.map((q) => el("button", {
+    type: "button", class: "btn", "aria-current": String(quadrantOf(task) === q),
+    onclick: () => {
+      if (quadrantOf(task) !== q) { task.quadrant = q; task.reason = "you moved it"; }
+      save();
+      $("move-dialog").close();
+      render();
+    },
+  }, QUADRANTS[q].label, el("small", {}, QUADRANTS[q].hint))));
+  $("move-dialog").showModal();
+}
+
+$("move-remove").addEventListener("click", () => {
+  const day = today();
+  day.tasks = day.tasks.filter((t) => t !== moving);
+  save();
+  $("move-dialog").close();
+  render();
+});
+
 function renderPlan(day) {
-  $("plan-list").replaceChildren(...day.tasks.map((t) => taskRow(day, t, { removable: true, checkable: false })));
+  renderChat($("chat-plan"), day.chat || []);
+  renderMatrix($("matrix-plan"), day, { checkable: false });
   $("start-day").disabled = day.tasks.length === 0;
 
   const prev = lastDayBefore(day.date);
@@ -154,7 +261,15 @@ function renderPlan(day) {
   $("carry-box").hidden = carry.length === 0;
   $("carry-list").replaceChildren(...carry.map((title) => el("button", {
     class: "chip", type: "button",
-    onclick: () => { day.tasks.push(makeTask(title, prev.date)); save(); render(); },
+    onclick: () => {
+      const old = prev.tasks.find((t) => t.title === title);
+      const task = makeTask(title, prev.date);
+      task.quadrant = old?.quadrant || classifyLocal(title).quadrant;
+      task.reason = "carried from last time";
+      day.tasks.push(task);
+      save();
+      render();
+    },
   }, `+ ${title}`)));
 }
 
@@ -162,7 +277,8 @@ function renderActive(day) {
   const c = completion(day);
   $("active-pct").textContent = `${c.done}/${c.total} done`;
   $("active-bar").style.width = `${c.total ? (c.done / c.total) * 100 : 0}%`;
-  $("active-list").replaceChildren(...day.tasks.map((t) => taskRow(day, t, { removable: t.status === STATUS.OPEN })));
+  renderMatrix($("matrix-active"), day, { checkable: true });
+  renderChat($("chat-active"), (day.chat || []).filter((m) => m.at >= day.plannedAt).slice(-2));
 
   const next = nextCheckinAt(day, state.settings);
   const allDone = c.total > 0 && c.done === c.total;
@@ -183,7 +299,7 @@ function renderActive(day) {
 
 function renderReview(day) {
   const labels = { [STATUS.DONE]: "Done", [STATUS.PARTIAL]: "Partly", [STATUS.MISSED]: "Didn't" };
-  $("review-list").replaceChildren(...day.tasks.map((t) => {
+  $("review-list").replaceChildren(...day.tasks.slice().sort(byQuadrant).map((t) => {
     const seg = el("div", { class: "seg", role: "group", "aria-label": t.title },
       ...Object.entries(labels).map(([s, label]) => el("button", {
         type: "button", "data-s": s, "aria-pressed": String(t.status === s),
@@ -193,7 +309,9 @@ function renderReview(day) {
       el("input", { type: "checkbox", checked: t.carry !== false,
         onchange: (e) => { t.carry = e.target.checked; save(); } }),
       "Carry to tomorrow") : null;
-    return el("li", {}, el("span", { class: "title" }, t.title), seg, carry);
+    return el("li", {},
+      el("span", { class: "title" }, t.title, " ", el("span", { class: "qtag" }, QUADRANTS[quadrantOf(t)].label)),
+      seg, carry);
   }));
   if (document.activeElement !== $("reflection")) $("reflection").value = day.reflection || "";
 }
@@ -263,11 +381,12 @@ function openCheckin() {
   if (dlg.open) return;
   pending = new Set();
   $("checkin-title").textContent = `Check-in · ${fmtTime(new Date())}`;
-  const open = day.tasks.filter((t) => t.status === STATUS.OPEN);
+  const open = day.tasks.filter((t) => t.status === STATUS.OPEN).sort(byQuadrant);
   $("checkin-tasks").replaceChildren(...open.map((t) => el("li", {},
     el("input", { type: "checkbox", id: `ci-${t.id}`,
       onchange: (e) => { e.target.checked ? pending.add(t.id) : pending.delete(t.id); } }),
-    el("label", { class: "title", for: `ci-${t.id}` }, t.title))));
+    el("label", { class: "title", for: `ci-${t.id}` }, t.title),
+    el("span", { class: "qtag" }, QUADRANTS[quadrantOf(t)].label))));
   $("checkin-form").reset();
   dlg.showModal();
 }
@@ -344,15 +463,6 @@ function switchTab(name) {
   render();
 }
 
-function addFrom(input) {
-  const title = input.value.trim();
-  if (!title) return;
-  today().tasks.push(makeTask(title));
-  input.value = "";
-  save();
-  render();
-  input.focus();
-}
 
 function fillSettings() {
   const f = $("settings-form");
@@ -360,12 +470,43 @@ function fillSettings() {
   f.dayEnd.value = state.settings.dayEnd;
   f.checkinMinutes.value = String(state.settings.checkinMinutes);
   renderNotifStatus();
+  renderAiStatus();
+}
+
+function renderAiStatus() {
+  const key = getApiKey();
+  $("ai-status").textContent = key
+    ? `Claude sorts your messages (key ending …${key.slice(-4)}).`
+    : "Sorting on this device.";
+  $("ai-clear").hidden = !key;
+  $("ai-key").value = "";
 }
 
 for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => switchTab(b.dataset.tab));
 
-$("plan-form").addEventListener("submit", (e) => { e.preventDefault(); addFrom($("plan-input")); });
-$("active-form").addEventListener("submit", (e) => { e.preventDefault(); addFrom($("active-input")); });
+for (const form of document.querySelectorAll(".composer")) {
+  const box = form.querySelector("textarea");
+  const button = form.querySelector("button");
+  const send = async () => {
+    const text = box.value.trim();
+    if (!text || busy) return;
+    busy = true;
+    button.disabled = true;
+    box.value = "";
+    box.style.height = "";
+    try { await handleChat(text); } finally {
+      busy = false;
+      button.disabled = false;
+      box.focus();
+    }
+  };
+  form.addEventListener("submit", (e) => { e.preventDefault(); send(); });
+  // Enter sends, Shift+Enter adds a line (one task per line).
+  box.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+  });
+  box.addEventListener("input", () => { box.style.height = ""; box.style.height = `${box.scrollHeight}px`; });
+}
 
 $("start-day").addEventListener("click", () => {
   const day = today();
@@ -415,6 +556,15 @@ $("settings-form").addEventListener("submit", (e) => {
   render();
 });
 $("notif-enable").addEventListener("click", askNotifications);
+$("ai-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const key = $("ai-key").value.trim();
+  if (!key) return;
+  if (!key.startsWith("sk-ant-")) { alert("That doesn't look like an Anthropic API key (they start with sk-ant-)."); return; }
+  setApiKey(key);
+  renderAiStatus();
+});
+$("ai-clear").addEventListener("click", () => { setApiKey(""); renderAiStatus(); });
 
 $("export").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
@@ -441,7 +591,8 @@ $("import").addEventListener("change", async (e) => {
   }
 });
 $("reset").addEventListener("click", () => {
-  if (!confirm("Erase all days and settings on this device?")) return;
+  if (!confirm("Erase all days, settings and your Claude key on this device?")) return;
+  setApiKey("");
   state.settings = { ...DEFAULT_SETTINGS };
   state.days = {};
   save();

@@ -30,15 +30,16 @@
 
       <div id="panel-plan" class="card" hidden>
         <h2>Good morning. What do you want to do today?</h2>
-        <form id="plan-form" class="add-row">
-          <input id="plan-input" type="text" placeholder="Add something you want to get done" autocomplete="off" maxlength="200">
-          <button type="submit" class="btn">Add</button>
-        </form>
+        <div id="chat-plan" class="chat" aria-live="polite"></div>
         <div id="carry-box" hidden>
           <p class="muted small">Unfinished from last time:</p>
           <div id="carry-list" class="chips"></div>
         </div>
-        <ul id="plan-list" class="task-list"></ul>
+        <form class="composer" data-chat="chat-plan">
+          <textarea rows="1" placeholder="report by 3pm, gym, call mom…" aria-label="Tell me what you want to do" maxlength="2000"></textarea>
+          <button type="submit" class="btn primary">Send</button>
+        </form>
+        <div id="matrix-plan" class="matrix"></div>
         <button id="start-day" class="btn primary wide" disabled>Start my day</button>
       </div>
 
@@ -48,9 +49,10 @@
           <span id="active-pct" class="pct"></span>
         </div>
         <div class="bar"><div id="active-bar" class="bar-fill"></div></div>
-        <ul id="active-list" class="task-list"></ul>
-        <form id="active-form" class="add-row">
-          <input id="active-input" type="text" placeholder="Add another task" autocomplete="off" maxlength="200">
+        <div id="matrix-active" class="matrix"></div>
+        <div id="chat-active" class="chat compact" aria-live="polite"></div>
+        <form class="composer" data-chat="chat-active">
+          <textarea rows="1" placeholder="Something new came up?" aria-label="Add tasks" maxlength="2000"></textarea>
           <button type="submit" class="btn">Add</button>
         </form>
         <p id="next-checkin" class="muted small"></p>
@@ -123,6 +125,21 @@
         <span id="settings-saved" class="muted small" hidden>Saved</span>
       </form>
       <div class="card">
+        <h2>Smarter sorting with Claude</h2>
+        <p class="muted small">Optional. Without a key, tasks are sorted on this device using keywords
+          like “today”, “client”, “deadline” or “someday”. With your own
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Anthropic API key</a>,
+          Claude reads each message and sorts it.</p>
+        <form id="ai-form" class="add-row">
+          <input id="ai-key" type="password" placeholder="sk-ant-…" autocomplete="off" aria-label="Anthropic API key">
+          <button type="submit" class="btn">Save key</button>
+        </form>
+        <p id="ai-status" class="muted small"></p>
+        <button id="ai-clear" class="btn ghost" hidden>Remove key</button>
+        <p class="muted small">The key is stored in this browser only and sent only to Anthropic.
+          Anyone who can use this browser profile could read it, so use a key with a low spending limit.</p>
+      </div>
+      <div class="card">
         <h2>Reminders</h2>
         <p class="muted small" id="notif-status"></p>
         <button id="notif-enable" class="btn">Turn on notifications</button>
@@ -160,6 +177,18 @@
       <div class="row end">
         <button type="button" id="checkin-snooze" class="btn ghost">Snooze 30 min</button>
         <button type="submit" value="save" class="btn primary">Save check-in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="move-dialog">
+    <form method="dialog">
+      <h2 id="move-title">Move task</h2>
+      <p id="move-reason" class="muted small"></p>
+      <div id="move-options" class="move-grid"></div>
+      <div class="row end">
+        <button type="button" id="move-remove" class="btn danger">Remove task</button>
+        <button value="cancel" class="btn ghost">Cancel</button>
       </div>
     </form>
   </dialog>
