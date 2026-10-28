@@ -155,7 +155,7 @@ function renderMatrix(container, day, { checkable }) {
             onchange: (e) => { setStatus(t, e.target.checked ? STATUS.DONE : STATUS.OPEN); save(); render(); },
           }) : null,
           el("button", { class: "task-btn", type: "button", title: "Move or remove", onclick: () => openMove(t) }, t.title))))
-        : el("p", { class: "empty" }, "Nothing here"));
+        : el("p", { class: "empty" }, QUADRANTS[q].example));
   }));
 }
 
@@ -250,8 +250,17 @@ $("move-remove").addEventListener("click", () => {
   render();
 });
 
+const EXAMPLE = "Client report due 3pm, gym, clear my inbox today, call mom, organize the garage someday";
+
 function renderPlan(day) {
-  renderChat($("chat-plan"), day.chat || []);
+  if (day.chat?.length) renderChat($("chat-plan"), day.chat);
+  else {
+    $("chat-plan").replaceChildren(
+      el("div", { class: "msg bot" },
+        "List everything you want to get done today, the way you'd text it. I'll sort each task by impact and urgency."),
+      el("button", { class: "chip example-btn", type: "button", onclick: () => sendFromComposer($("panel-plan"), EXAMPLE) },
+        `Try an example: “${EXAMPLE}”`));
+  }
   renderMatrix($("matrix-plan"), day, { checkable: false });
   $("start-day").disabled = day.tasks.length === 0;
 
@@ -484,6 +493,14 @@ function renderAiStatus() {
 
 for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => switchTab(b.dataset.tab));
 
+// Lets other controls (the example chip) send through a panel's composer.
+const composerSenders = new Map();
+function sendFromComposer(panel, text) {
+  const form = panel.querySelector(".composer");
+  form.querySelector("textarea").value = text;
+  composerSenders.get(form)?.();
+}
+
 for (const form of document.querySelectorAll(".composer")) {
   const box = form.querySelector("textarea");
   const button = form.querySelector("button");
@@ -500,6 +517,7 @@ for (const form of document.querySelectorAll(".composer")) {
       box.focus();
     }
   };
+  composerSenders.set(form, send);
   form.addEventListener("submit", (e) => { e.preventDefault(); send(); });
   // Enter sends, Shift+Enter adds a line (one task per line).
   box.addEventListener("keydown", (e) => {
@@ -540,13 +558,30 @@ $("reopen-day").addEventListener("click", () => {
   render();
 });
 
+// In-page replacements for alert/confirm, which embedded views can block.
+function showNotice(node, text, isError = false) {
+  node.textContent = text;
+  node.classList.toggle("error", isError);
+  node.hidden = !text;
+}
+
+function ask(text, okLabel) {
+  const dlg = $("confirm-dialog");
+  $("confirm-text").textContent = text;
+  $("confirm-ok").textContent = okLabel;
+  dlg.returnValue = "";
+  dlg.showModal();
+  return new Promise((resolve) => dlg.addEventListener("close", () => resolve(dlg.returnValue === "ok"), { once: true }));
+}
+
 $("settings-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
   if (f.dayEnd.value <= f.dayStart.value) {
-    alert("The review time needs to be after the morning prompt.");
+    showNotice($("settings-error"), "The review time needs to be after the morning prompt.", true);
     return;
   }
+  showNotice($("settings-error"), "");
   state.settings.dayStart = f.dayStart.value;
   state.settings.dayEnd = f.dayEnd.value;
   state.settings.checkinMinutes = Number(f.checkinMinutes.value);
@@ -560,7 +595,10 @@ $("ai-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const key = $("ai-key").value.trim();
   if (!key) return;
-  if (!key.startsWith("sk-ant-")) { alert("That doesn't look like an Anthropic API key (they start with sk-ant-)."); return; }
+  if (!key.startsWith("sk-ant-")) {
+    $("ai-status").textContent = "That doesn't look like an Anthropic API key. Keys start with sk-ant-.";
+    return;
+  }
   setApiKey(key);
   renderAiStatus();
 });
@@ -578,26 +616,28 @@ $("import").addEventListener("change", async (e) => {
   try {
     const data = JSON.parse(await file.text());
     if (!data.days || typeof data.days !== "object") throw new Error("missing days");
-    if (!confirm("Replace the data on this device with the imported file?")) return;
+    if (!(await ask("Replace the data on this device with the imported file?", "Replace"))) return;
     state.settings = { ...DEFAULT_SETTINGS, ...data.settings };
     state.days = data.days;
     save();
     fillSettings();
     render();
+    showNotice($("data-msg"), "Imported.");
   } catch {
-    alert("That file doesn't look like a Daily Check-in export.");
+    showNotice($("data-msg"), "That file doesn't look like a Daily Check-in export.", true);
   } finally {
     e.target.value = "";
   }
 });
-$("reset").addEventListener("click", () => {
-  if (!confirm("Erase all days, settings and your Claude key on this device?")) return;
+$("reset").addEventListener("click", async () => {
+  if (!(await ask("Erase all days, settings and your Claude key on this device?", "Erase everything"))) return;
   setApiKey("");
   state.settings = { ...DEFAULT_SETTINGS };
   state.days = {};
   save();
   fillSettings();
   render();
+  showNotice($("data-msg"), "Everything on this device was erased.");
 });
 
 document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });

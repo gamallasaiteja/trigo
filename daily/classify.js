@@ -2,10 +2,10 @@
 // This is the offline sorter; ai.js does the same job with Claude when a key is set.
 
 export const QUADRANTS = {
-  do: { label: "Do now", hint: "High impact · urgent" },
-  plan: { label: "Schedule", hint: "High impact · not urgent" },
-  quick: { label: "Quick / delegate", hint: "Low impact · urgent" },
-  later: { label: "Later / drop", hint: "Low impact · not urgent" },
+  do: { label: "Do now", hint: "High impact · urgent", example: "e.g. client report due at 3pm" },
+  plan: { label: "Schedule", hint: "High impact · not urgent", example: "e.g. gym, plan next quarter" },
+  quick: { label: "Quick / delegate", hint: "Low impact · urgent", example: "e.g. clear inbox today" },
+  later: { label: "Later / drop", hint: "Low impact · not urgent", example: "e.g. sort old photos someday" },
 };
 export const QUADRANT_ORDER = ["do", "plan", "quick", "later"];
 
@@ -21,6 +21,7 @@ const URGENT = [
   [/\b(asap|urgent(ly)?|immediately|right away|right now)\b/, "urgent"],
   [/\b(today|tonight|this (morning|afternoon|evening))\b/, "today"],
   [/\b(overdue|deadline|due (today|tomorrow|tonight|noon|by|at))\b/, "deadline"],
+  [/\bdue \d{1,2}(:\d{2})?\s*(am|pm)\b/, "deadline"],
   [/\b(by|before|at) \d{1,2}(:\d{2})?\s*(am|pm)?\b/, "has a set time"],
   [/\b(eod|end of (the )?day|by noon|by lunch)\b/, "due today"],
   [/!/, "you flagged it"],

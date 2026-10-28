@@ -63,3 +63,8 @@ test("raw split keeps #tags so they still steer sorting", async () => {
   const parts = splitRaw("scroll reddit #do, laundry");
   assert.deepEqual(parts.map((p) => classifyLocal(p).quadrant), ["do", "later"]);
 });
+
+test("a bare 'due 3pm' counts as urgent", () => {
+  assert.equal(classifyLocal("Client report due 3pm").quadrant, "do");
+  assert.equal(classifyLocal("Rent due 10:30am").quadrant, "do");
+});

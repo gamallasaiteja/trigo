@@ -123,6 +123,7 @@
         </label>
         <button type="submit" class="btn primary">Save</button>
         <span id="settings-saved" class="muted small" hidden>Saved</span>
+        <p id="settings-error" class="notice error" role="alert" hidden></p>
       </form>
       <div class="card">
         <h2>Smarter sorting with Claude</h2>
@@ -155,6 +156,7 @@
           <label class="btn">Import<input id="import" type="file" accept="application/json" hidden></label>
           <button id="reset" class="btn danger">Erase everything</button>
         </div>
+        <p id="data-msg" class="notice" role="status" hidden></p>
       </div>
     </section>
   </main>
@@ -177,6 +179,16 @@
       <div class="row end">
         <button type="button" id="checkin-snooze" class="btn ghost">Snooze 30 min</button>
         <button type="submit" value="save" class="btn primary">Save check-in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog">
+      <p id="confirm-text"></p>
+      <div class="row end">
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button value="ok" id="confirm-ok" class="btn danger">Confirm</button>
       </div>
     </form>
   </dialog>

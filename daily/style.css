@@ -13,7 +13,7 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #12121a;
     --card: #1c1c27;
     --text: #ececf4;
@@ -26,6 +26,20 @@
     --missed: #f87171;
     color-scheme: dark;
   }
+}
+/* An explicit dark choice wins over a light system setting. */
+:root[data-theme="dark"] {
+  --bg: #12121a;
+  --card: #1c1c27;
+  --text: #ececf4;
+  --muted: #9a9ab0;
+  --line: #2d2d3c;
+  --accent: #8b85ff;
+  --accent-soft: #2a2850;
+  --done: #4ade80;
+  --partial: #fbbf24;
+  --missed: #f87171;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -168,3 +182,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .45); }
 .move-grid .btn small { color: var(--muted); font-size: .75rem; }
 .move-grid .btn[aria-current=true] { border-color: var(--accent); background: var(--accent-soft); }
 a { color: var(--accent); }
+
+.notice { font-size: .875rem; margin: 8px 0 0; }
+.notice.error { color: var(--missed); }
+.example-btn { align-self: flex-start; }
