@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Mitdo",
+    "slug": "mitdo",
+    "scheme": "mitdo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F9F7"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.mitdo.mobile"
+    },
+    "android": {
+      "package": "app.mitdo.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#E8F4EC",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#218C52"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false,
+      "tsconfigPaths": true
+    }
+  }
+}
