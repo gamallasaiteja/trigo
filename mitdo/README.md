@@ -26,6 +26,22 @@ npx expo start          # scan the QR code with Expo Go, or press i / a / w
   **Profile → Load example tasks** (about 4 weeks of example activity, clearly
   opt-in; **Delete all data** removes it).
 
+### Development build (full notification support)
+
+`expo-dev-client` and `eas.json` are already set up. Builds run in Expo's cloud,
+so no Xcode or Android Studio is needed:
+
+```bash
+npm install -g eas-cli
+eas login                      # free Expo account
+eas init                       # links the project (once)
+eas build --profile development --platform android   # or ios
+npx expo start --dev-client    # then open the installed app
+```
+
+iOS builds need a paid Apple Developer account; register your iPhone first
+with `eas device:create`.
+
 ```bash
 npm test                # 23 unit tests: recurrence, task ops, analytics, insights, notification plan
 npm run typecheck
